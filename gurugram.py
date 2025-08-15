@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.impute import SimpleImputer
 from pandas.plotting import scatter_matrix
 
 #splitting data into test and train sets
@@ -50,15 +51,27 @@ df = strat_train_set.copy()
 # plt.show()
 
 #checking for the correlation using scatter matrix
-df.drop("ocean_proximity", axis=1, inplace=True)
-corr_matrix = df.corr()
+# df.drop("ocean_proximity", axis=1, inplace=True)
+# corr_matrix = df.corr()
 
 # This is a quick way to see which features have the strongest positive or negative correlation with median_house_value.
 # Values close to +1 → strong positive correlation
 # Values close to -1 → strong negative correlation
 # Values near 0 → weak or no correlation
 
-print(corr_matrix["median_house_value"].sort_values(ascending=False))
-attributes = ["housing_median_age", "median_income", "median_house_value"]
-scatter_matrix(df[attributes],figsize=(12,8))
-plt.show()
+# print(corr_matrix["median_house_value"].sort_values(ascending=False))
+# attributes = ["housing_median_age", "median_income", "median_house_value"]
+# scatter_matrix(df[attributes],figsize=(12,8))
+# plt.show()
+
+#starting data preprocessing here
+
+#here using print(df.describe()) in the count section of total_bedrooms, you can see count is less there than other means there are null values, we need to tackle these null values as well
+housing_labels = df["median_house_value"].copy()
+housing_features = df.drop("median_house_value", axis=1)
+#now using impute we will handle missing values
+imputer = SimpleImputer(strategy="median")
+#it takes noly number values from data not strings etc as here we have ocean_proximity
+housing_num = housing_features.select_dtypes(include = [np.number])
+imputed_x = imputer.fit_transform(housing_num)
+print(imputed_x)

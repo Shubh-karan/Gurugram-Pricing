@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.impute import SimpleImputer
 from pandas.plotting import scatter_matrix
+from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, StandardScaler
 
 #splitting data into test and train sets
 
@@ -74,4 +75,26 @@ imputer = SimpleImputer(strategy="median")
 #it takes noly number values from data not strings etc as here we have ocean_proximity
 housing_num = housing_features.select_dtypes(include = [np.number])
 imputed_x = imputer.fit_transform(housing_num)
-print(imputed_x)
+housing_new = pd.DataFrame(imputed_x, columns=housing_num.columns, index=housing_num.index)
+housing_new["ocean_proximity"] = df["ocean_proximity"]
+# here we are trying or showing how we can work with ordinal encoder but are not working with that as of now as t isn't suits here
+# ordinal_encoder = OrdinalEncoder()
+# housing_encoded = ordinal_encoder.fit_transform(housing_new)
+# housing_cat = pd.DataFrame(housing_encoded,columns=housing_new.columns, index=housing_new.index)
+# here we are going to use OneHotEncoder so that we get values as matrix
+onehot_encoder = OneHotEncoder()
+housing_encoded = onehot_encoder.fit_transform(housing_new[["ocean_proximity"]])
+
+housing_cat = pd.DataFrame(
+    housing_encoded.toarray(),
+    columns=['<1H OCEAN', 'INLAND', 'ISLAND', 'NEAR BAY', 'NEAR OCEAN'], #onehot_encoder.get_feature_names_out(["ocean_proximity"]) we can also use this funtion so that it will give automatic column names to the column
+    index=housing_new.index
+)
+df = pd.concat([housing_new,housing_cat],axis=1)
+df = df.drop("ocean_proximity", axis=1)
+#working on scaling data
+scaler = StandardScaler()
+df_scaled = scaler.fit_transform(df)
+df_scaled = pd.DataFrame(df_scaled,columns=df.columns, index=df.index)
+print(df_scaled)
+

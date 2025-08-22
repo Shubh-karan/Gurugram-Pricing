@@ -2,11 +2,15 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.impute import SimpleImputer
 from pandas.plotting import scatter_matrix
 from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import cross_val_score
 
 #splitting data into test and train sets
 
@@ -95,6 +99,25 @@ df = df.drop("ocean_proximity", axis=1)
 #working on scaling data
 scaler = StandardScaler()
 df_scaled = scaler.fit_transform(df)
-df_scaled = pd.DataFrame(df_scaled,columns=df.columns, index=df.index)
-print(df_scaled)
 
+#here below we are going to check check which model will fit best here
+#Linear Regressor
+linear_mod = LinearRegression()
+linear_mod.fit(df_scaled,housing_labels)
+linear_predicts = linear_mod.predict(df_scaled)
+linear_rmse = -cross_val_score(linear_mod,df_scaled,housing_labels,scoring="neg_root_mean_squared_error", cv=10)
+print(f"Root mean sqaure error for Linear Regressor is {pd.Series(linear_rmse).mean()}")
+
+#Decision Tree Regressor
+deciontree_mod = DecisionTreeRegressor()
+deciontree_mod.fit(df_scaled,housing_labels)
+deciontree_predicts = deciontree_mod.predict(df_scaled)
+deciontree_rmse = -cross_val_score(deciontree_mod,df_scaled,housing_labels,scoring="neg_root_mean_squared_error", cv=10)
+print(f"Root mean sqaure error for Decision Treee Regressor is {pd.Series(deciontree_rmse).mean()}")
+
+#random forest regressor
+rfr_mod = RandomForestRegressor()
+rfr_mod.fit(df_scaled,housing_labels)
+rfr_predicts = rfr_mod.predict(df_scaled)
+rfr_rmse = -cross_val_score(rfr_mod,df_scaled,housing_labels,scoring="neg_root_mean_squared_error", cv=10)
+print(f"Root mean sqaure error for Random Forest Regressor is {pd.Series(rfr_rmse).mean()}")

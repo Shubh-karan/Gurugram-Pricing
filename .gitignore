@@ -1,0 +1,5 @@
+# Ignore model and pipeline files
+*.pkl
+
+# Ignore datasets
+*.csv
